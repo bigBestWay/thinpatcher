@@ -65,6 +65,18 @@ apt install libcapstone3 libcapstone-dev
 ```
 ./make.sh
 ```
+###CJsonObject  
+https://github.com/Bwar/CJsonObject  
+这个工程稍微比较麻烦，因为开发者只提供了代码没有想发布链接库的意思，需要我们手工编译生成。
+```
+cd demo
+make
+cd ..
+ar crv libCJsonObject.a cJSON.o CJsonObject.o
+cp CJsonObject.hpp /usr/local/include
+cp cJSON.h /usr/local/include
+cp libCJsonObject.a /usr/local/lib
+```
 ##使用
 ```
 SilverThinPatcher <binary> <address> <asm file> [--replace]

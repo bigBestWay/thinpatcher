@@ -5,20 +5,11 @@
 #include "BinaryEditor.h"
 #include "KSEngine.h"
 #include "CSEngine.h"
+#include "Config.h"
 
 void usage(const char * programe)
 {
-	std::cerr << "Usage: " << programe << " <binary> <address> <asm file> [--replace]" << std::endl;
-	std::cerr << "       [--replace] insert code at 'address' by default."<< std::endl;
-}
-
-char * readFile(int fd)
-{
-    off_t count = lseek(fd, 0, SEEK_END);
-    char * content = new char[count];
-    lseek(fd, 0, SEEK_SET);
-    read(fd, content, count);
-    return content;
+	std::cerr << "Usage: " << programe << " <binary> <config.json>" << std::endl;
 }
 
 void insert_code(const char * assembly, uint64_t address)
@@ -66,7 +57,7 @@ void replace_code(const char * assembly, uint64_t address)
 
 int main(int argc, char *argv[])
 {
-    if (argc < 4)
+    if (argc < 3)
     {
         usage(argv[0]);
         return 1;
@@ -79,45 +70,31 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-    uint64_t address = std::stoull(argv[2], nullptr, 16);
-    if (address == 0)
-    {
-        std::cerr << "'address' param must be a hex number." << std::endl;
-        return 1;
-    }
-    
+    Config::instance()->init(argv[2]);
+    std::list<ConfigUnit> configs;
+    Config::instance()->loadPatchs(configs);
 
-    std::string asmfile = argv[3];
-    int fd = open(asmfile.c_str(), 0);
-    if (fd < 0)
+    for (const ConfigUnit & config : configs)
     {
-        std::cerr << "cannot access file " << asmfile << std::endl;
-        return 1;
-    }
-    
-    bool isInsert = true;
-    if (argc == 5)
-    {
-        std::string arg4 = argv[4];
-        if (arg4 != "--replace")
+        uint64_t address = config.addr;
+        if (address == 0)
         {
-            std::cerr << "unkown param '" << arg4 << "'" << std::endl;
-            return 1;
+            std::cerr << "'address' param must be a hex number." << std::endl;
+            continue;
         }
-        isInsert = false;
+                
+        bool isInsert = !config.is_replace;
+        std::cout << "ASM text:" << std::endl << config.asmtext << std::endl;
+        if (isInsert)
+        {
+            insert_code(config.asmtext.c_str(), address);
+        }
+        else
+        {
+            replace_code(config.asmtext.c_str(), address);
+        }
     }
-
-    char * content = readFile(fd);
-    std::cout << "ASM text:" << std::endl << std::string(content) << std::endl;
-    if (isInsert)
-    {
-        insert_code(content, address);
-    }
-    else
-    {
-        replace_code(content, address);
-    }
-
+    
     std::string elfout = elfIn + "_patched";
 	unlink(elfout.c_str());
 	BinaryEditor::instance()->writeFile(elfout);
