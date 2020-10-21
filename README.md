@@ -79,11 +79,23 @@ cp libCJsonObject.a /usr/local/lib
 ```
 ##使用
 ```
-SilverThinPatcher <binary> <address> <asm file> [--replace]
+SilverThinPatcher <binary> <config>
 binary: elf文件路径  
-address: 指令地址
-asm file: 欲插入或覆写的汇编指令文本
---replace: 如果不提供此参数，默认插入代码；否则覆写
+config: json配置文件路径
+{
+    "patches":[
+        {
+            "address": "0x400814",
+            "asmtext": "NOP;NOP;xor rax,rax;",
+            "replace" : 0 #插入模式，1为覆写模式
+        },
+        {
+            "address": "0x40081E",
+            "asmtext": "NOP;NOP;xor rbx,rbx;",
+            "replace" : 0
+        }
+    ]
+}
 ```
 ##Contact
 nu00string@gmail.com
