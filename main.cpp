@@ -55,14 +55,39 @@ void replace_code(const char * assembly, uint64_t address)
 {
     std::vector<uint8_t> patchcode;
     KSEngine::instance()->assemble(assembly, address, patchcode);
+    cs_insn * insns = nullptr;
+    size_t count = 0;
     try
     {
+        const std::vector<uint8_t> & code = BinaryEditor::instance()->get_content(address, 0x1000);
+        count = CSEngine::instance()->disasm(code, address, &insns);
+        if (count <= 1)
+        {
+            std::cerr << "disass fail. "<< std::endl;
+            return;
+        }
+        
+        size_t size = 0;
+        for (size_t i = 0; i < count; i++)
+        {
+            const cs_insn & insn = insns[i];
+            size += insn.size;
+            if (size >= patchcode.size())
+            {
+                //多余的指令码使用NOP补齐
+                size_t rest = size - patchcode.size();
+                patchcode.insert(patchcode.end(), rest, '\x90');
+                break;
+            }
+        }
+                
         BinaryEditor::instance()->patch_address(address, patchcode);
     }
     catch(const std::exception& e)
     {
         std::cerr << e.what() << '\n';
     }
+    cs_free(insns, count);
 }
 
 int main(int argc, char *argv[])
@@ -84,8 +109,10 @@ int main(int argc, char *argv[])
     std::list<ConfigUnit> configs;
     Config::instance()->loadPatchs(configs);
 
+    int index = 0;
     for (const ConfigUnit & config : configs)
     {
+        std::cout << "\e[1m""\e[0;34m""----------- " << ++index << " -----------" "\e[0m"<< std::endl;
         uint64_t address = config.addr;
         if (address == 0)
         {
@@ -94,7 +121,6 @@ int main(int argc, char *argv[])
         }
                 
         bool isInsert = !config.is_replace;
-        std::cout << "ASM text:" << std::endl << config.asmtext << std::endl;
         if (isInsert)
         {
             std::cout << "**INSERT MODE**" << std::endl;
@@ -105,6 +131,7 @@ int main(int argc, char *argv[])
             std::cout << "**REPLACE MODE**" << std::endl;
             replace_code(config.asmtext.c_str(), address);
         }
+        std::cout << "ASM text:" << std::endl << config.asmtext << std::endl;
     }
     
     std::string elfout = elfIn + "_patched";
