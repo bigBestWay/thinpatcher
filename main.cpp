@@ -14,18 +14,19 @@ void usage(const char * programe)
 
 void insert_code(const char * assembly, uint64_t address)
 {
-    //第1步，获取给定地址的代码并反编译，写死0x1000字节应该足够了
-    const std::vector<uint8_t> & code = BinaryEditor::instance()->get_content(address, 0x1000);
     cs_insn * insns = nullptr;
-    size_t count = CSEngine::instance()->disasm(code, address, &insns);
-    if (count <= 1)
-    {
-        std::cerr << "disass fail. "<< std::endl;
-        return;
-    }
-
+    size_t count = 0;
     try
     {
+        //第1步，获取给定地址的代码并反编译，写死0x1000字节应该足够了
+        const std::vector<uint8_t> & code = BinaryEditor::instance()->get_content(address, 0x1000);
+        count = CSEngine::instance()->disasm(code, address, &insns);
+        if (count <= 1)
+        {
+            std::cerr << "disass fail. "<< std::endl;
+            return;
+        }
+
         std::vector<PatchUnit> patchUnits;
         InstrumentManager::instance()->generateJmpCode(insns, count, assembly, patchUnits);
         for (const PatchUnit & unit : patchUnits)
@@ -41,8 +42,10 @@ void insert_code(const char * assembly, uint64_t address)
     catch(int& e)
     {
         std::cerr << "generateJmpCode excepiton. " << std::endl;
-        cs_free(insns, count);
-        return;
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
     }
     
     cs_free(insns, count);
@@ -52,7 +55,14 @@ void replace_code(const char * assembly, uint64_t address)
 {
     std::vector<uint8_t> patchcode;
     KSEngine::instance()->assemble(assembly, address, patchcode);
-    BinaryEditor::instance()->patch_address(address, patchcode);
+    try
+    {
+        BinaryEditor::instance()->patch_address(address, patchcode);
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
 }
 
 int main(int argc, char *argv[])
@@ -87,10 +97,12 @@ int main(int argc, char *argv[])
         std::cout << "ASM text:" << std::endl << config.asmtext << std::endl;
         if (isInsert)
         {
+            std::cout << "**INSERT MODE**" << std::endl;
             insert_code(config.asmtext.c_str(), address);
         }
         else
         {
+            std::cout << "**REPLACE MODE**" << std::endl;
             replace_code(config.asmtext.c_str(), address);
         }
     }

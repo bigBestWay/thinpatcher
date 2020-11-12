@@ -7,7 +7,7 @@ struct ConfigUnit
 {
 	uint64_t addr;
 	std::string asmtext;
-	bool is_replace;
+	int is_replace;
 };
 
 class JsonWrapper;
