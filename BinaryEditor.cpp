@@ -33,20 +33,15 @@ void BinaryEditor::patch_address(uint64_t address, const std::vector<uint8_t> & 
 */
 void BinaryEditor::loadCodeDefaultCaves()
 {
-	/*
 	for (Segment & segment : _binary->segments())
 	{
 		SEGMENT_TYPES type = segment.type();
 		if (type == SEGMENT_TYPES::PT_GNU_EH_FRAME)
 		{
-			CodeCave cave;
-			cave.virtual_addr = segment.virtual_address();
-			cave.size = segment.virtual_size();
-			std::cout << "load cave " << std::hex << cave.virtual_addr << ", size " << std::hex << cave.size << std::endl;
 			segment.add(ELF_SEGMENT_FLAGS::PF_X);
-			InstrumentManager::instance()->addCodeCave(cave);
 		}
-	}*/
+	}
+
 	for (const Section & section : _binary->sections())
 	{
 		const std::string & name = section.name();
