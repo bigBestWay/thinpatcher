@@ -110,5 +110,22 @@ config: json配置文件路径
     ]
 }
 ```
+###使用限制  
+```
+.text:0804890A 8B 45 FC                    mov     eax, [ebp+var_4]
+.text:0804890D 83 C4 10                    add     esp, 10h
+.text:08048910 5D                          pop     ebp  <---
+.text:08048911 C3                          retn
+.text:08048911             sub_80488A0     endp
+.text:08048911
+.text:08048912 66 66 66 66+                align 10h
+.text:08048920             sub_8048920     proc near               ; CODE 
+.text:08048920
+.text:08048920 55                          push    ebp
+.text:08048921 89 E5                       mov     ebp, esp
+.text:08048923 83 EC 28                    sub     esp, 28h
+.text:08048926 8B 45 08                    mov     eax, [ebp+arg_0]
+```
+如上代码，如果想在08048910位置插入代码，将产生问题。因为该位置只有2个字节就到了另一个函数sub_8048920，2个字节放不下一条跳转指令。因此插入点至少要在距离函数尾5个字节或以上的位置。
 ##Contact
 nu00string@gmail.com
