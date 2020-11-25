@@ -1,5 +1,6 @@
 #include "KSEngine.h"
 #include "BinaryEditor.h"
+#include <iostream>
 
 void KSEngine::assemble(const char * assembly, uint64_t address, std::vector<uint8_t> & code)
 {
@@ -24,7 +25,7 @@ KSEngine * KSEngine::_instance = nullptr;
 KSEngine::KSEngine()
 {
 	ks_err err;
-	if (ELF_CLASS::ELFCLASS32 == BinaryEditor::instance()->getPlatform())
+	if (ELF_CLASS::ELF_CLASS32 == BinaryEditor::instance()->getPlatform())
 	{
 		err = ks_open(KS_ARCH_X86, KS_MODE_32, &_ks);
 	}

@@ -1,16 +1,31 @@
 #pragma once
-#include <LIEF/ELF.hpp>
+#include <libelf.h>
+#include <gelf.h>
+#include <map>
+#include <list>
 #include "InstrumentManager.h"
-using namespace LIEF::ELF;
 
 #define DEFAULT_SECTION_SIZE 4096
+
+enum ELF_CLASS
+{
+	ELF_CLASSNONE = 0,
+	ELF_CLASS32 = 1,
+	ELF_CLASS64 = 2
+};
 
 class BinaryEditor
 {
 private:
-	BinaryEditor(){}
+	BinaryEditor():_binary(nullptr), _fd(-1), _elf_class(ELF_CLASSNONE), _shstrndx(0)
+	{}
 	~BinaryEditor() {}
 	static BinaryEditor * _instance;
+
+	class Elf_Phdr
+	{
+
+	};
 public:
 	static BinaryEditor * instance()
 	{
@@ -27,29 +42,33 @@ public:
 		_instance = nullptr;
 	}
 
-	bool init(const std::string & elfname);
+	bool init(const char * elfname);
 
-	void writeFile(const std::string & elfname);
+	void writeFile();
 
 	ELF_CLASS getPlatform()
 	{
-		return _binary->type();
+		return _elf_class;
 	}
 
 	void patch_address(uint64_t address, const std::vector<uint8_t> & code);
 
 	CodeCave * addSection(size_t size = 4096);
 
-	//GOT在ld阶段立即绑定，而不是lazy模式
-	bool isBindNow()const;
+	std::vector<uint8_t> get_content(uint64_t address, uint64_t size);
 
-	std::vector<uint8_t> get_content(uint64_t address, uint64_t size)
-	{
-		return _binary->get_content_from_virtual_address(address, size);
-	}
 private:
+	int segment_from_virtual_address(uint64_t address, GElf_Phdr & phdr);
+	int section_from_virtual_address(uint64_t address, GElf_Shdr & shdr);
+	const char * get_section_name(const GElf_Shdr & shdr)const;
+
 	void loadCodeDefaultCaves();
 private:
-	std::unique_ptr<Binary> _binary;
+	Elf * _binary;
+	int _fd;
+	size_t _shstrndx;
+	ELF_CLASS _elf_class;
+	std::map<int, GElf_Shdr> _sections;
+	std::map<int, GElf_Phdr> _segments;
 };
 

@@ -11,40 +11,9 @@ make
 ```
 apt install cmake
 ```
-###LIEF 0.10.1  
-https://github.com/lief-project/LIEF  
-下载源码，编译安装  
+###libelf 
 ```
-wget https://github.com/lief-project/LIEF/archive/0.10.1.tar.gz
-tar xvf 0.10.1.tar.gz
-cd LIEF-0.10.1
-```
-LIEF在x32 NO-PIE的情况下，添加segment会导致BUG：
-```
-Inconsistency detected by ld.so: rtld.c: 1191: dl_main: Assertion `GL(dl_rtld_map).l_libname' failed!
-```
-解决方法：
-在LIEF源码中添加section会添加一个Segment，添加完Segment后调用replace方法将此新段与PT_NOTE互换，即临时解决了此问题。
-```
-src/ELF/Binary.tcc 631行:
--Segment& segment_added = this->add(new_segment);
-+Segment * p_segment_added = nullptr;
-+if(this->type() == ELF_CLASS::ELFCLASS32 && this->header().file_type() != E_TYPE::ET_DYN)
-+{
-+  Segment & note = this->get(SEGMENT_TYPES::PT_NOTE);
-+  p_segment_added = &this->replace(new_segment,note);
-+}
-+else
-+{
-+  p_segment_added = &this->add(new_segment);
-+}
-+Segment& segment_added = *p_segment_added;
-```
-打完补丁后
-```
-cmake .
-make -j4
-make install
+apt install libelf-dev
 ```
 ###keystone  
 https://github.com/keystone-engine/keystone  

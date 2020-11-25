@@ -2,6 +2,7 @@
 #include "CSEngine.h"
 #include "KSEngine.h"
 #include "BinaryEditor.h"
+#include <iostream>
 
 InstrumentManager * InstrumentManager::_instance = nullptr;
 
@@ -37,7 +38,7 @@ void InstrumentManager::generateJmpCode(const cs_insn * insns, size_t count, con
 	//printf("Cave: addr = 0x%x, size = %lu\n", cave->virtual_addr, cave->size);
 	std::vector<uint8_t> jmpToUpCode;
 	std::vector<uint8_t> dstCode;
-	bool isX32 = BinaryEditor::instance()->getPlatform() == ELF_CLASS::ELFCLASS32;
+	bool isX32 = BinaryEditor::instance()->getPlatform() == ELF_CLASS::ELF_CLASS32;
 
 	std::string jmpTo = "jmp " + std::to_string(cave->virtual_addr);
 	const uint64_t jmpToUpCodeAddr = insns[0].address;
