@@ -1,12 +1,14 @@
 #include "CSEngine.h"
 #include "BinaryEditor.h"
+#include <iostream>
+#include <cstring>
 
 CSEngine * CSEngine::_instance = nullptr;
 
 CSEngine::CSEngine()
 {
 	cs_err err = CS_ERR_OK;
-	if (ELF_CLASS::ELFCLASS32 == BinaryEditor::instance()->getPlatform())
+	if (ELF_CLASS::ELF_CLASS32 == BinaryEditor::instance()->getPlatform())
 	{
 		err = cs_open(CS_ARCH_X86, CS_MODE_32, &_handle);
 		_espname = "esp";
@@ -36,7 +38,7 @@ size_t CSEngine::disasm(const std::vector<uint8_t> & code, uint64_t address, cs_
 
 bool CSEngine::isInsnOphasRIP(const cs_insn & insn)
 {
-	const char * ripName = BinaryEditor::instance()->getPlatform() == ELF_CLASS::ELFCLASS32 ? "eip" : "rip";
+	const char * ripName = BinaryEditor::instance()->getPlatform() == ELF_CLASS::ELF_CLASS32 ? "eip" : "rip";
 	cs_x86 * x86 = &insn.detail->x86;
 	for (size_t i = 0; i < x86->op_count; ++i)
 	{
@@ -91,7 +93,18 @@ void CSEngine::disasmShow(const std::vector<uint8_t> & code, uint64_t address, b
 
 void CSEngine::disasmShow(const cs_insn & insn, bool showdetail /*= true*/)
 {
-	printf("0x%" PRIx64 ":\t%s\t%s\n", insn.address, insn.mnemonic, insn.op_str);
+	printf("0x%" PRIx64 ": ", insn.address);
+	if (!showdetail)
+	{
+		hexDump(insn.bytes, insn.size);
+		int size = insn.size;
+		for (int i = size; i < 8; i++)
+		{
+			printf("   ");
+		}
+	}
+	
+	printf("\t%s\t%s\n", insn.mnemonic, insn.op_str);
 	if (showdetail)
 	{
 		cs_x86 * x86 = &(insn.detail->x86);
@@ -144,6 +157,6 @@ void CSEngine::hexDump(const void * ptr, int size)
 	{
 		printf("%02x ", ((uint8_t *)ptr)[i]);
 	}
-	printf("\n");
+	//printf("\n");
 }
 

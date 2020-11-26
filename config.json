@@ -1,14 +1,9 @@
 {
     "patches":[
         {
-            "address": "0x400814",
+            "address": "0x750",
             "asmtext": "NOP;NOP;xor rax,rax;",
             "replace" : 0
-        },
-        {
-            "address": "0x40081E",
-            "asmtext": "NOP;NOP;xor rbx,rbx;",
-            "replace" : 1
         }
     ]
 }

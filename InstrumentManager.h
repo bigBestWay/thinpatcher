@@ -61,6 +61,8 @@ public:
 	CodeCave * addCodeCave(const CodeCave & cave);
 private:
 	static void generateJmpCode(const cs_insn * insns, size_t count, const char * assembly, CodeCave * cave, std::vector<PatchUnit> & patchUnits);
+	static void translate(uint64_t newaddress, const std::vector<const cs_insn *> & insns, std::vector<uint8_t> & code);
+	static bool calc_rip_addressing(const cs_insn & insn, uint64_t newaddress, std::vector<uint8_t> & outcode);
 private:
 	std::list<CodeCave> m_caves;
 private:

@@ -35,6 +35,8 @@ public:
 
 	//指令操作数里是否有RIP, 比如RET或mov eax, [RIP + 8]
 	bool isInsnOphasRIP(const cs_insn & insn);
+	//如果是RIP寻址，输出地址，返回true; 否则返回false
+	bool calc_rip_addressing(const cs_insn & insn, uint64_t & addr);
 
 	void disasmShow(const std::vector<uint8_t> & code, uint64_t address, bool showdetail = false);
 

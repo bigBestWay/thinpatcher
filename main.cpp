@@ -119,34 +119,41 @@ int main(int argc, char *argv[])
     std::list<ConfigUnit> configs;
     Config::instance()->loadPatchs(configs);
 
-    int index = 0;
-    for (const ConfigUnit & config : configs)
-    {
-        std::cout << "\e[1m""\e[0;34m""----------- " << ++index << " -----------" "\e[0m"<< std::endl;
-        uint64_t address = config.addr;
-        if (address == 0)
-        {
-            std::cerr << "'address' param must be a hex number." << std::endl;
-            continue;
-        }
-                
-        bool isInsert = !config.is_replace;
-        if (isInsert)
-        {
-            std::cout << "**INSERT MODE**" << std::endl;
-            insert_code(config.asmtext.c_str(), address);
-        }
-        else
-        {
-            std::cout << "**REPLACE MODE**" << std::endl;
-            replace_code(config.asmtext.c_str(), address);
-        }
-        std::cout << "ASM text:" << std::endl << config.asmtext << std::endl;
-    }
+	try
+	{
+		int index = 0;
+		for (const ConfigUnit & config : configs)
+		{
+			std::cout << "\e[1m""\e[0;34m""----------- " << ++index << " -----------" "\e[0m" << std::endl;
+			uint64_t address = config.addr;
+			if (address == 0)
+			{
+				std::cerr << "'address' param must be a hex number." << std::endl;
+				continue;
+			}
+
+			bool isInsert = !config.is_replace;
+			if (isInsert)
+			{
+				std::cout << "**INSERT MODE**" << std::endl;
+				insert_code(config.asmtext.c_str(), address);
+			}
+			else
+			{
+				std::cout << "**REPLACE MODE**" << std::endl;
+				replace_code(config.asmtext.c_str(), address);
+			}
+			std::cout << "ASM text:" << std::endl << config.asmtext << std::endl;
+		}
+	}
+	catch (...)
+	{
+		std::cerr << "exception occurored" << std::endl;
+	}
     
 	BinaryEditor::instance()->writeFile();
 	chmod(patchedElf.c_str(), S_IRUSR| S_IWUSR| S_IXUSR);
-	std::cout << "\033[1m\033[31m" << patchedElf << " updated." << "\033[0m" << std::endl;
+	std::cout << "\033[1m\033[31m" << patchedElf << " generated." << "\033[0m" << std::endl;
     
     return 0;
 }
