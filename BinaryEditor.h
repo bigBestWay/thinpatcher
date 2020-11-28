@@ -55,9 +55,6 @@ private:
 	int segment_from_virtual_address(uint64_t address, GElf_Phdr & phdr);
 	int section_from_virtual_address(uint64_t address, GElf_Shdr & shdr);
 	const char * get_section_name(const GElf_Shdr & shdr)const;
-	int set_shstr_ndx(size_t ndx);
-	void set_new_shstr_section(const std::string & new_section_name);
-	void addSegment();
 
 	void loadCodeDefaultCaves();
 private:

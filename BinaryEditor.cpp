@@ -125,11 +125,6 @@ void BinaryEditor::patch_address(uint64_t address, const std::vector<uint8_t> & 
 	}
 }
 
-void BinaryEditor::addSegment()
-{
-
-}
-
 /*一个ELF文件加载到进程中的只看Segment，section是链接使用的。
 因此寻找code cave可以使用加载进内存中但又没什么用的Segement。
 比如PT_NOTE、PT_GNU_EH_FRAME，并修改标志位使该段可执行。
@@ -158,34 +153,6 @@ void BinaryEditor::loadCodeDefaultCaves()
 			}
 		}
 	}
-}
-
-int BinaryEditor::set_shstr_ndx(size_t ndx) 
-{
-	GElf_Ehdr ehdr_mem;
-	GElf_Ehdr * ehdr = gelf_getehdr(_binary, &ehdr_mem);
-	if (ehdr == NULL)
-		return -1;
-
-	if (ndx < SHN_LORESERVE)
-		ehdr->e_shstrndx = ndx;
-	else 
-	{
-		ehdr->e_shstrndx = SHN_XINDEX;
-		Elf_Scn * zscn = elf_getscn(_binary, 0);
-		GElf_Shdr zshdr_mem;
-		GElf_Shdr * zshdr = gelf_getshdr(zscn, &zshdr_mem);
-		if (zshdr == NULL)
-			return -1;
-		zshdr->sh_link = ndx;
-		if (gelf_update_shdr(zscn, zshdr) == 0)
-			return -1;
-	}
-
-	if (gelf_update_ehdr(_binary, ehdr) == 0)
-		return -1;
-
-	return 0;
 }
 
 std::vector<uint8_t> BinaryEditor::get_content(uint64_t address, uint64_t size)
