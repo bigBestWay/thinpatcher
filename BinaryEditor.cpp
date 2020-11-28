@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <cstring>
+#include "InstrumentManager.h"
 
 BinaryEditor * BinaryEditor::_instance = nullptr;
 
@@ -124,6 +125,11 @@ void BinaryEditor::patch_address(uint64_t address, const std::vector<uint8_t> & 
 	}
 }
 
+void BinaryEditor::addSegment()
+{
+
+}
+
 /*一个ELF文件加载到进程中的只看Segment，section是链接使用的。
 因此寻找code cave可以使用加载进内存中但又没什么用的Segement。
 比如PT_NOTE、PT_GNU_EH_FRAME，并修改标志位使该段可执行。
@@ -154,22 +160,32 @@ void BinaryEditor::loadCodeDefaultCaves()
 	}
 }
 
-CodeCave * BinaryEditor::addSection(size_t size)
+int BinaryEditor::set_shstr_ndx(size_t ndx) 
 {
-	/*
-	std::cout<< "\033[31m" << "Add section size " << size << "\033[0m" <<std::endl;
-	//没有足够大小的cave了，只能添加段
-	Section new_section{ ".gnu.text" };
-	new_section.add(ELF_SECTION_FLAGS::SHF_EXECINSTR);
-	new_section.add(ELF_SECTION_FLAGS::SHF_ALLOC);
-	std::vector<uint8_t> data(size, 0x90);
-	new_section.content(data);
-	new_section = _binary->add(new_section);
-	CodeCave cave;
-	cave.virtual_addr = new_section.virtual_address();
-	cave.size = new_section.size();
-	return InstrumentManager::instance()->addCodeCave(cave);
-	*/
+	GElf_Ehdr ehdr_mem;
+	GElf_Ehdr * ehdr = gelf_getehdr(_binary, &ehdr_mem);
+	if (ehdr == NULL)
+		return -1;
+
+	if (ndx < SHN_LORESERVE)
+		ehdr->e_shstrndx = ndx;
+	else 
+	{
+		ehdr->e_shstrndx = SHN_XINDEX;
+		Elf_Scn * zscn = elf_getscn(_binary, 0);
+		GElf_Shdr zshdr_mem;
+		GElf_Shdr * zshdr = gelf_getshdr(zscn, &zshdr_mem);
+		if (zshdr == NULL)
+			return -1;
+		zshdr->sh_link = ndx;
+		if (gelf_update_shdr(zscn, zshdr) == 0)
+			return -1;
+	}
+
+	if (gelf_update_ehdr(_binary, ehdr) == 0)
+		return -1;
+
+	return 0;
 }
 
 std::vector<uint8_t> BinaryEditor::get_content(uint64_t address, uint64_t size)

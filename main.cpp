@@ -6,6 +6,7 @@
 #include "KSEngine.h"
 #include "CSEngine.h"
 #include "Config.h"
+#include "InstrumentManager.h"
 #include <iostream>
 
 void usage(const char * programe)

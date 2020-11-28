@@ -2,6 +2,7 @@
 #include "BinaryEditor.h"
 #include <iostream>
 #include <cstring>
+#include <inttypes.h>
 
 CSEngine * CSEngine::_instance = nullptr;
 

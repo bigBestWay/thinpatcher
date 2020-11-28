@@ -4,6 +4,7 @@
 #include "BinaryEditor.h"
 #include <iostream>
 #include <cstring>
+#include <inttypes.h>
 
 InstrumentManager * InstrumentManager::_instance = nullptr;
 
@@ -124,11 +125,9 @@ void InstrumentManager::generateJmpCode(const cs_insn * insns, size_t count, con
 			return;
 		}
 	}
-	//std::cout << "getJmpCodeCave not enough cave." << std::endl;
-	//现有cave不能满足要求，添加新段
-	CodeCave * cave = BinaryEditor::instance()->addSection();
-	generateJmpCode(insns, count, assembly, cave, patchUnits);
-	InstrumentManager::instance()->addCodeCave(*cave);
+
+	std::cout << "getJmpCodeCave not enough cave space." << std::endl;
+	throw 1;
 }
 
 void InstrumentManager::translate(uint64_t newaddress, const std::vector<const cs_insn *> & insns, std::vector<uint8_t> & code)
