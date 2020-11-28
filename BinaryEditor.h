@@ -17,7 +17,7 @@ enum ELF_CLASS
 class BinaryEditor
 {
 private:
-	BinaryEditor():_binary(nullptr), _fd(-1), _elf_class(ELF_CLASSNONE), _shstrndx(0), _extra_shname(0), _extra_section_name(".gnu.text")
+	BinaryEditor():_binary(nullptr), _fd(-1), _elf_class(ELF_CLASSNONE), _shstrndx(0)
 	{}
 	~BinaryEditor() {}
 	static BinaryEditor * _instance;
@@ -61,12 +61,8 @@ private:
 	Elf * _binary;
 	int _fd;
 	size_t _shstrndx;
-	/* 新添加节的名字字符表中的偏移 */
-	size_t _extra_shname;
 	ELF_CLASS _elf_class;
 	std::map<int, GElf_Shdr> _sections;
 	std::map<int, GElf_Phdr> _segments;
-	/* extra section name*/
-	std::string _extra_section_name;
 };
 
