@@ -1,21 +1,21 @@
-#thinPatcher  
+# thinPatcher  
 一款CTF AWD二进制防御补丁工具  
-##编译安装  
+## 编译安装  
 Ubuntu 16.04 x64，使用cmake编译：
 ```
 cmake .
 make
 ```
-##依赖组件  
-###CMake  
+## 依赖组件  
+### CMake  
 ```
 apt install cmake
 ```
-###libelf 
+### libelf 
 ```
 apt install libelf-dev
 ```
-###keystone  
+### keystone  
 https://github.com/keystone-engine/keystone  
 下载源码，编译安装
 ```
@@ -26,7 +26,7 @@ cmake .
 make -j4
 make install
 ```
-###capstone  
+### capstone  
 https://github.com/aquynh/capstone  
 ```
 apt install libcapstone3 libcapstone-dev
@@ -38,7 +38,7 @@ tar xvf 4.0.2.tar.gz
 cd capstone-4.0.2
 ./make.sh
 ```
-###CJsonObject  
+### CJsonObject  
 https://github.com/Bwar/CJsonObject  
 这个工程稍微比较麻烦，因为开发者只提供了代码没有想发布链接库的意思，需要我们手工编译生成。
 ```
@@ -51,7 +51,7 @@ cp CJsonObject.hpp /usr/local/include
 cp cJSON.h /usr/local/include
 cp libCJsonObject.a /usr/local/lib
 ```
-##使用
+## 使用
 ```
 SilverThinPatcher <binary> <config>
 binary: elf文件路径  
@@ -71,7 +71,7 @@ config: json配置文件路径
     ]
 }
 ```
-###使用限制  
+### 使用限制  
 ```
 .text:0804890A 8B 45 FC                    mov     eax, [ebp+var_4]
 .text:0804890D 83 C4 10                    add     esp, 10h
@@ -88,5 +88,5 @@ config: json配置文件路径
 .text:08048926 8B 45 08                    mov     eax, [ebp+arg_0]
 ```
 如上代码，如果想在08048910位置插入代码，将产生问题。因为该位置只有2个字节就到了另一个函数sub_8048920，2个字节放不下一条跳转指令。因此插入点至少要在距离函数尾5个字节或以上的位置。
-##Contact
+## Contact
 nu00string@gmail.com
