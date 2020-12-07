@@ -1,4 +1,4 @@
-#SilverThinPatcher  
+#thinPatcher  
 一款CTF AWD二进制防御补丁工具  
 ##编译安装  
 Ubuntu 16.04 x64，使用cmake编译：

@@ -3,7 +3,7 @@
 #
 cmake_minimum_required (VERSION 2.8)
 
-project ("SilverThinPatcher")
+project ("thinPatcher")
 
 SET(CMAKE_SYSTEM_NAME Linux)
 SET(CMAKE_BUILD_TYPE "Debug")
